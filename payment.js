@@ -1,14 +1,27 @@
 // payment.js
 
+/**
+ * Variabel Global yang Akan Disediakan oleh HTML (index.html)
+ * Harap pastikan variabel ini dideklarasikan di <script> tag di index.html sebelum memuat payment.js
+ */
+// let selectedPrice = 0;
+// let selectedProduct = '';
+// let countdownInterval = null;
+// const closeModal = () => { /* ... definisi di index.html ... */ };
+// const startCountdown = (duration, displayElement) => { /* ... definisi di index.html ... */ };
+
+
 // Endpoint transaksi utama
 const API_URL = 'https://api-96422-kuota.id/v1';
 
 /**
  * Mengirim detail pesanan ke gateway pembayaran (Simulasi API).
+ * String QRIS dipindahkan ke fungsi ini.
  */
 function createOrder(product, phone, amount) {
     const latency = Math.floor(Math.random() * 1000) + 1000;
 
+    // Detail payload (hanya untuk referensi, tidak dikirim sungguhan di simulasi ini)
     const payload = {
         endpoint: `${API_URL}/transaction/create`,
         method: 'POST',
@@ -21,7 +34,7 @@ function createOrder(product, phone, amount) {
 
     return new Promise((resolve) => {
         setTimeout(() => {
-            // Respons dari Gateway (String QRIS ada di sini)
+            // Respons dari Gateway (String QRIS DITAMPILKAN HANYA DI SINI)
             const response = {
                 status: 'success',
                 message: 'Order created successfully. Waiting for payment.',
@@ -31,8 +44,8 @@ function createOrder(product, phone, amount) {
                     destination: phone,
                     total_amount: amount,
                     payment_method: 'QRIS',
-                    // *** STRING QRIS YANG SENSITIF ***
-                    qr_code_string: '00020101021126670016COM.BIBANK.WWW01189360050300000907180214531277541631500303UMI51440014ID.CO.QRIS.WWW0215ID20254466748920303UMI5204481253033605802ID5914Pulsa CELLULAR6009INDONESIA61059024262070703A0163045CAF',
+                    // *** STRING QRIS YANG ANDA MINTA PINDAHKAN ADA DI BAWAH INI ***
+                    qr_code_string: '00020101021126670016COM.NOBUBANK.WWW01189360050300000907180214531277541631500303UMI51440014ID.CO.QRIS.WWW0215ID20254466748920303UMI5204481253033605802ID5914Pulsa CELLULAR6009INDONESIA61059024262070703A0163045CAF',
                     expiry_minutes: 10
                 }
             };
@@ -46,7 +59,6 @@ function createOrder(product, phone, amount) {
  * Menampilkan Modal QRIS setelah mendapatkan nomor HP dan memproses order.
  */
 async function showQR() {
-    // Mengakses variabel dan fungsi global dari index.html (selectedPrice, selectedProduct, closeModal, startCountdown)
     const phone = document.getElementById('phoneNumber').value;
     const modal = document.getElementById('modalContent');
 
@@ -55,7 +67,7 @@ async function showQR() {
         return;
     }
 
-    // Tampilkan pesan loading
+    // Tampilkan pesan loading yang profesional
     modal.innerHTML = `
         <h3>Memproses Pesanan...</h3>
         <p>Memvalidasi nomor dan stok produk...</p> 
@@ -65,6 +77,8 @@ async function showQR() {
     `;
 
     try {
+        // Panggil fungsi untuk membuat pesanan
+        // selectedProduct dan selectedPrice berasal dari variabel global di index.html
         const apiResponse = await createOrder(selectedProduct, phone, selectedPrice);
 
         if (apiResponse.status !== 'success') {
