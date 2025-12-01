@@ -16,7 +16,7 @@ const API_URL = 'https://api-96422-kuota.id/v1';
 
 /**
  * Mengirim detail pesanan ke gateway pembayaran (Simulasi API).
- * String QRIS dipindahkan ke fungsi ini.
+ * String QRIS telah diganti menjadi URL Gambar PNG Statis.
  */
 function createOrder(product, phone, amount) {
     const latency = Math.floor(Math.random() * 1000) + 1000;
@@ -34,7 +34,7 @@ function createOrder(product, phone, amount) {
 
     return new Promise((resolve) => {
         setTimeout(() => {
-            // Respons dari Gateway (String QRIS DITAMPILKAN HANYA DI SINI)
+            // Respons dari Gateway
             const response = {
                 status: 'success',
                 message: 'Order created successfully. Waiting for payment.',
@@ -44,8 +44,8 @@ function createOrder(product, phone, amount) {
                     destination: phone,
                     total_amount: amount,
                     payment_method: 'QRIS',
-                    // *** STRING QRIS YANG ANDA MINTA PINDAHKAN ADA DI BAWAH INI ***
-                    qr_code_string: '00020101021126670016COM.NOBUBANK.WWW01189360050300000907180214531277541631500303UMI51440014ID.CO.QRIS.WWW0215ID20254466748920303UMI5204481253033605802ID5914Pulsa CELLULAR6009INDONESIA61059024262070703A0163045CAF',
+                    // *** PERUBAHAN DI SINI: Menggunakan URL Gambar PNG Statis ***
+                    qr_image_url: 'https://iili.io/fxHDNDv.png',
                     expiry_minutes: 10
                 }
             };
@@ -88,8 +88,10 @@ async function showQR() {
         }
 
         const data = apiResponse.data;
-        const qrString = data.qr_code_string;
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qrString)}&size=220x220`;
+        
+        // *** PERUBAHAN DI SINI: Langsung ambil URL gambar dari respon API ***
+        // Tidak perlu generate via qrserver.com lagi
+        const qrUrl = data.qr_image_url;
 
         // Tampilkan modal QRIS
         modal.innerHTML = `
@@ -104,10 +106,12 @@ async function showQR() {
 
             <div class="qr-container">
                 <p id="payment-timer">Batas Waktu: <strong>${data.expiry_minutes}:00</strong></p>
-                <a href="${qrUrl}" download="NetHub_Payment_QRIS_${data.transaction_id}.png">
+                
+                <a href="${qrUrl}" download="NetHub_Payment_QRIS_${data.transaction_id}.png" target="_blank">
                     <img class='qr-image' src='${qrUrl}' alt='QRIS Payment' />
                 </a>
-                <a href="${qrUrl}" class="download-qr-link" download="NetHub_Payment_QRIS_${data.transaction_id}.png" style="font-size: 0.9rem; color: #007aff; display: block; margin-top: 5px;">
+                
+                <a href="${qrUrl}" class="download-qr-link" download="NetHub_Payment_QRIS_${data.transaction_id}.png" target="_blank" style="font-size: 0.9rem; color: #007aff; display: block; margin-top: 5px;">
                     Unduh Kode QR
                 </a>
             </div>
@@ -131,6 +135,7 @@ async function showQR() {
         startCountdown(60 * data.expiry_minutes, timerDisplay);
 
     } catch (error) {
+        console.error(error); // Debugging
         alert('Terjadi kesalahan sistem. Silakan coba lagi.');
         closeModal();
     }
